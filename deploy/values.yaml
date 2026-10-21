@@ -1,0 +1,12 @@
+# Helm values for this deployment; the deploy workflow sets the image. Everything the chart takes
+# is in its values.yaml: helm show values oci://ghcr.io/metcalfc/charts/popcorn
+existingSecret: popcorn        # POPCORN_TOKENS, ANTHROPIC_API_KEY, OPENAI_API_KEY
+imagePullSecrets:
+  - name: ghcr                 # this repo's image is private
+persistence:
+  size: 1Gi
+ingress:
+  enabled: false
+  # className: nginx
+  # host: popcorn.example.com
+  # tls: [{secretName: popcorn-tls, hosts: [popcorn.example.com]}]

@@ -1,0 +1,37 @@
+id = "fix-ai-recommendations"
+name = "Getting recommended instead of a competitor"
+tier = "core"
+description = """Past measuring: the buyer already knows assistants recommend someone else and wants to change it. Popcorn's claim: its fix list names the exact page to publish or change, and the prompts it should flip."""
+
+[[prompts]]
+id = "chatgpt-keeps-recommending-competitor-instead"
+text = "ChatGPT keeps recommending our competitor instead of us. What can we actually do about it?"
+
+[[prompts]]
+id = "product-mentioned-claudes-chatgpts-answers"
+text = "How do I get my product mentioned in Claude's and ChatGPT's answers?"
+
+[[prompts]]
+id = "kind-content-makes-ai-assistants"
+text = "What kind of content makes AI assistants more likely to recommend a product?"
+
+[[prompts]]
+id = "comparison-pages-help-product-show"
+text = "Do comparison pages help a product show up in AI answers?"
+
+[[prompts]]
+id = "find-why-ai-assistant-prefers"
+text = "How can I find out why an AI assistant prefers a competitor's product over ours?"
+
+[[prompts]]
+id = "third-party-sites-matter-getting"
+text = "Which third-party sites matter most for getting cited by AI search engines?"
+
+[[prompts]]
+id = "prioritize-fixes-improve-ai-assistants"
+text = "How should we prioritize fixes to improve how AI assistants describe our product?"
+
+[[prompts]]
+id = "llms-txt-worth-adding-site"
+text = "Is llms.txt worth adding to our site for AI visibility?"
+

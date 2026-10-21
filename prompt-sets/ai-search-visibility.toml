@@ -1,0 +1,86 @@
+id = "ai-search-visibility"
+name = "Finding out whether AI assistants recommend us"
+tier = "core"
+description = """The first question a marketer asks once buyers start asking ChatGPT and Claude instead of Google: are we in the answer? Popcorn's claim: a self-hosted tool that measures it on your own buyer questions and tells you what to fix."""
+
+# Products the grader folds onto one canonical name, so share of voice counts each once.
+
+[[prompts]]
+id = "find-whether-chatgpt-recommends-product"
+text = "How can I find out whether ChatGPT recommends my product when people ask about my category?"
+
+[[prompts]]
+id = "tools-track-often-ai-assistants"
+text = "What tools track how often AI assistants like ChatGPT, Claude and Perplexity mention a brand?"
+
+[[prompts]]
+id = "measure-share-voice-ai-chatbot"
+text = "Is there a way to measure our share of voice in AI chatbot answers?"
+
+[[prompts]]
+id = "monitor-whether-ai-search-engines"
+text = "How do I monitor whether AI search engines cite our website?"
+
+[[prompts]]
+id = "benchmark-brands-visibility-llm-answers"
+text = "What's the best way to benchmark my brand's visibility in LLM answers against competitors?"
+
+[[prompts]]
+id = "open-source-tools-measuring-ai"
+text = "Are there open-source tools for measuring AI search visibility?"
+
+[[prompts]]
+id = "want-track-ai-answer-visibility"
+text = "We want to track AI answer visibility without sending our data to another SaaS vendor. What are our options?"
+
+[[prompts]]
+id = "generative-engine-optimization-tools-work"
+text = "How do generative engine optimization tools work, and which ones are worth paying for?"
+
+[[prompts]]
+id = "metrics-marketing-team-use-measure"
+text = "What metrics should a marketing team use to measure presence in AI assistant answers?"
+
+[[prompts]]
+id = "see-web-pages-ai-assistants"
+text = "How can I see which web pages AI assistants rely on when they answer questions in my category?"
+
+[[prompts]]
+id = "test-same-buyer-questions-against"
+text = "Can I test the same buyer questions against several AI models and compare the answers?"
+
+[[prompts]]
+id = "often-re-check-whether-ai"
+text = "How often should we re-check whether AI assistants recommend us, and how do we track changes over time?"
+
+[[prompts]]
+id = "cheap-start-measuring-ai-visibility"
+text = "What's a cheap way to start measuring AI visibility for a small startup?"
+
+[[prompts]]
+id = "ai-visibility-tools-run-schedule"
+text = "Which AI visibility tools can run on a schedule and alert us when we drop out of answers?"
+
+[[prompts]]
+id = "prove-leadership-whether-content-work"
+text = "How do I prove to leadership whether our content work is changing what AI assistants recommend?"
+
+[[competitors]]
+name = "Profound"
+aliases = ["tryprofound", "Profound AI"]
+
+[[competitors]]
+name = "Peec AI"
+aliases = ["Peec"]
+
+[[competitors]]
+name = "Otterly.AI"
+aliases = ["Otterly"]
+
+[[competitors]]
+name = "Semrush AI Toolkit"
+aliases = ["Semrush"]
+
+[[competitors]]
+name = "Ahrefs Brand Radar"
+aliases = ["Ahrefs"]
