@@ -27,9 +27,17 @@ Any Linux machine with Docker and the compose plugin.
 4. Merge, or run the deploy workflow by hand. It logs the host into GHCR with the run's own
    token just long enough to pull, then `docker compose up -d`.
 
-The database lives in the `popcorn-data` volume. Back it up with
-`docker run --rm -v popcorn_popcorn-data:/data -v $PWD:/out busybox cp /data/popcorn.db /out/`
-(Popcorn writes `popcorn.db.bak-v<N>` itself before any schema change). To restart by hand:
+The database lives in the `popcorn-data` volume. Back it up with Popcorn's own command, which
+takes a consistent copy while it runs (copying `popcorn.db` itself can miss recent writes still in
+SQLite's write-ahead log):
+
+```bash
+cd ~/popcorn
+docker compose exec popcorn /app/popcorn backup /data/backup-$(date +%F).db
+docker compose cp popcorn:/data/backup-$(date +%F).db .
+```
+
+Popcorn also writes `popcorn.db.bak-v<N>` itself before any schema change. To restart by hand:
 `cd ~/popcorn && docker compose --env-file image.env up -d`.
 
 ## Kubernetes
