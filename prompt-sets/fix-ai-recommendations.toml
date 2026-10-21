@@ -61,7 +61,7 @@ text = "How can I see the web search results an AI assistant gets for a question
 
 [[prompts]]
 id = "llms-txt-worth-adding-site"
-text = "Is llms.txt worth adding to our site for AI visibility?"
+text = "Is an llms.txt file worth adding to our site for AI visibility?"
 
 [[prompts]]
 id = "schema-markup-ai-citations"
@@ -121,3 +121,7 @@ aliases = ["Semrush"]
 [[competitors]]
 name = "Ahrefs Brand Radar"
 aliases = ["Ahrefs"]
+
+[[prompts]]
+id = "measure-impact-of-docs-change"
+text = "How can we tell whether a docs change made ChatGPT recommend us more often?"
