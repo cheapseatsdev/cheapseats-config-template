@@ -1,0 +1,93 @@
+name: deploy
+
+# On every merge to main: build this repo's image (Popcorn with this config) and push it to
+# ghcr.io/<this repo>:sha-<commit>, then deploy it if the repository variable DEPLOY says where:
+#
+#   DEPLOY=docker-host  secrets DEPLOY_HOST, DEPLOY_USER, DEPLOY_SSH_KEY (see deploy/README.md)
+#   DEPLOY=kubernetes   secret KUBECONFIG, and deploy/values.yaml (see deploy/README.md)
+#   unset               build and push only
+#
+# Rolling back is re-running an earlier successful run of this workflow.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.tag.outputs.image }}
+      popcorn: ${{ steps.tag.outputs.popcorn }}
+    steps:
+      - uses: actions/checkout@v5
+      - id: tag
+        run: |
+          echo "image=ghcr.io/${GITHUB_REPOSITORY,,}:sha-${GITHUB_SHA::12}" >>"$GITHUB_OUTPUT"
+          echo "popcorn=$(sed -n 's/^FROM .*:\(.*\)$/\1/p' Dockerfile | head -1)" >>"$GITHUB_OUTPUT"
+      - run: docker run --rm -v "$PWD:/config:ro" "$(sed -n 's/^FROM //p' Dockerfile | head -1)" check
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.tag.outputs.image }}
+          build-args: REVISION=${{ github.sha }}
+          provenance: false
+
+  docker-host:
+    needs: image
+    if: vars.DEPLOY == 'docker-host'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: deploy over SSH
+        env:
+          KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          HOST: ${{ secrets.DEPLOY_HOST }}
+          USER: ${{ secrets.DEPLOY_USER }}
+          IMAGE: ${{ needs.image.outputs.image }}
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ACTOR: ${{ github.actor }}
+        run: |
+          install -m 600 /dev/null key && printf '%s\n' "$KEY" >key
+          ssh="ssh -i key -o StrictHostKeyChecking=accept-new $USER@$HOST"
+          # The image is private: log the host in with this run's token just long enough to pull.
+          printf '%s' "$TOKEN" | $ssh "docker login ghcr.io -u $ACTOR --password-stdin >/dev/null"
+          $ssh "cd popcorn && POPCORN_IMAGE=$IMAGE docker compose pull && POPCORN_IMAGE=$IMAGE docker compose up -d --wait && echo POPCORN_IMAGE=$IMAGE >image.env"
+          $ssh "docker logout ghcr.io >/dev/null"
+
+  kubernetes:
+    needs: image
+    if: vars.DEPLOY == 'kubernetes'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v5
+      - uses: azure/setup-helm@v4
+        with:
+          version: v4.3.0
+      - name: helm upgrade
+        env:
+          KUBECONFIG_DATA: ${{ secrets.KUBECONFIG }}
+          IMAGE: ${{ needs.image.outputs.image }}
+          POPCORN: ${{ needs.image.outputs.popcorn }}
+        run: |
+          install -m 600 /dev/null kubeconfig && printf '%s\n' "$KUBECONFIG_DATA" >kubeconfig
+          export KUBECONFIG=$PWD/kubeconfig
+          # The chart is released with the app, at the same version as the Dockerfile's FROM.
+          helm upgrade --install popcorn oci://ghcr.io/metcalfc/charts/popcorn --version "$POPCORN" \
+            -f deploy/values.yaml --set image.repository="${IMAGE%:*}" --set image.tag="${IMAGE##*:}" \
+            --rollback-on-failure --timeout 5m

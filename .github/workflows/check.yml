@@ -1,0 +1,40 @@
+name: check
+
+# Every change: validate the config with the Popcorn release it's pinned to. On a pull request,
+# also comment what the change does to trends (popcorn plan).
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: the Popcorn release in the Dockerfile
+        id: popcorn
+        run: echo "image=$(sed -n 's/^FROM //p' Dockerfile | head -1)" >>"$GITHUB_OUTPUT"
+      - name: popcorn check
+        run: docker run --rm -v "$PWD:/config:ro" "${{ steps.popcorn.outputs.image }}" check
+      - name: popcorn plan
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          IMAGE: ${{ steps.popcorn.outputs.image }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          git worktree add -q "$RUNNER_TEMP/base" "$BASE"
+          if docker run --rm -v "$RUNNER_TEMP/base:/before:ro" -v "$PWD:/after:ro" "$IMAGE" plan /before /after >plan.md 2>plan.err; then
+            gh pr comment "$PR" --body-file plan.md --edit-last 2>/dev/null || gh pr comment "$PR" --body-file plan.md
+          else
+            echo "Couldn't plan against the base branch (it may be from before a config format change):"
+            cat plan.err
+          fi
