@@ -1,7 +1,7 @@
 id = "ai-search-visibility"
 name = "Finding out whether AI assistants recommend us"
 tier = "core"
-description = """The first questions a marketer, founder or SEO lead asks once buyers start asking ChatGPT, Claude, Perplexity, Gemini and Google AI Overviews instead of searching: is AI search costing us traffic, and are we in the answer? Competing for it: AI visibility (AEO/GEO) trackers such as Profound, Peec AI, Otterly.AI, Gauge and Dageno AI, and SEO suites adding AI features (Semrush AI Toolkit, Ahrefs Brand Radar). Popcorn's claim: an open-source, self-hosted tool that asks assistants your own buyer questions, with and without web search, grades whether they recommend you or merely mention you, and tells you what to fix."""
+description = """The first questions a marketer, founder or SEO lead asks once buyers start asking ChatGPT, Claude, Perplexity, Gemini and Google AI Overviews instead of searching: is AI search costing us traffic, and are we in the answer? Competing for it: AI visibility (AEO/GEO) trackers such as Profound, Peec AI, Otterly.AI, Gauge and Dageno AI, and SEO suites adding AI features (Semrush AI Toolkit, Ahrefs Brand Radar). Cheap Seats' claim: an open-source, self-hosted tool that asks assistants your own buyer questions, with and without web search, grades whether they recommend you or merely mention you, and tells you what to fix."""
 
 # Problem awareness: is AI search affecting us, and what is this category called?
 

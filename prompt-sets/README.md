@@ -1,7 +1,7 @@
 # Prompt sets
 
-Each file is one category of buyer questions. Popcorn only reads them, so change one with a pull
-request, after `popcorn check`.
+Each file is one category of buyer questions. Cheap Seats only reads them, so change one with a pull
+request, after `cheapseats check`.
 
 ```toml
 id = "ai-search-visibility"       # never change it: runs and rankings key on it
@@ -19,7 +19,7 @@ text = "What's the difference between being mentioned and being recommended in a
 intent = "info"                   # asks to explain, not to choose: scored on named, not recommended
 
 # Products the grader folds onto one canonical name, so share of voice counts "Peec" as Peec AI.
-# Competitors every set shares go once in popcorn.toml; list one here only for this set.
+# Competitors every set shares go once in cheapseats.toml; list one here only for this set.
 [[competitors]]
 name = "Peec AI"
 aliases = ["Peec"]
@@ -48,16 +48,16 @@ reworded prompts, changed intents, new competitors and new answerer models, and 
 the day before. Comparisons with the day before only count the prompts both days asked, worded the
 same. Editing a set's name, description or tier changes nothing. A new trend starts only when how
 answers are asked or graded changes: the brand's name, aliases, about or audience, the grader, or a
-Popcorn release that changes its prompts. The full list:
-[what restarts a trend](https://popcorn.zone/docs/prompt-sets/#what-restarts-a-trend).
+Cheap Seats release that changes its prompts. The full list:
+[what restarts a trend](https://cheapseats.dev/docs/prompt-sets/#what-restarts-a-trend).
 
 **Ask the way a buyer would.** Only `head-to-heads` names the brand; in every other set it has to be
-named on its own merits (`popcorn check` enforces this, matching the brand name and aliases as whole
+named on its own merits (`cheapseats check` enforces this, matching the brand name and aliases as whole
 words). Write each question the way someone who has never heard of the brand would type it, and keep
 each set at 15–20 prompts so a rate means something.
 
 Sets written before prompts had ids (`prompts = ["...", "..."]`) are converted by
-`popcorn migrate-config <dir>`, which makes an id from each prompt's words; review them before
+`cheapseats migrate-config <dir>`, which makes an id from each prompt's words; review them before
 committing.
 
 Prompts are sent to every answerer's provider on each run. Don't put anything in them that isn't public.

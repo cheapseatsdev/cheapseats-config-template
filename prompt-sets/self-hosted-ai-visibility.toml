@@ -1,7 +1,7 @@
 id = "self-hosted-ai-visibility"
 name = "Open-source and self-hosted AI visibility"
 tier = "plg"
-description = """Buyers who want to build rather than buy, or must keep their data in-house: developer-tools companies, technical founders, privacy-conscious and cost-conscious teams looking for open-source or self-hosted ways to track AI visibility. Competing for it: building it yourself on the model APIs, and SaaS trackers (Profound, Peec AI, Otterly.AI, Gauge). Popcorn's claim: MIT-licensed, one Docker container or a Helm chart, prompts kept in a git repo you own, your own API keys or Claude and ChatGPT subscriptions, a daily spend cap, and a CLI and MCP server alongside the web UI."""
+description = """Buyers who want to build rather than buy, or must keep their data in-house: developer-tools companies, technical founders, privacy-conscious and cost-conscious teams looking for open-source or self-hosted ways to track AI visibility. Competing for it: building it yourself on the model APIs, and SaaS trackers (Profound, Peec AI, Otterly.AI, Gauge). Cheap Seats' claim: MIT-licensed, one Docker container or a Helm chart, prompts kept in a git repo you own, your own API keys or Claude and ChatGPT subscriptions, a daily spend cap, and a CLI and MCP server alongside the web UI."""
 
 [[prompts]]
 id = "open-source-tools-measuring-ai"
