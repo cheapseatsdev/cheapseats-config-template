@@ -1,15 +1,15 @@
-# Popcorn on a Docker host. The deploy workflow copies nothing here: put this file and a .env in
-# ~/popcorn on the host once (see deploy/README.md), and each deploy pulls the new image.
+# Cheap Seats on a Docker host. The deploy workflow copies nothing here: put this file and a .env in
+# ~/cheapseats on the host once (see deploy/README.md), and each deploy pulls the new image.
 services:
-  popcorn:
-    image: ${POPCORN_IMAGE:?set POPCORN_IMAGE, or run the deploy workflow}
+  cheapseats:
+    image: ${CHEAPSEATS_IMAGE:?set CHEAPSEATS_IMAGE, or run the deploy workflow}
     restart: unless-stopped
     # Bound to localhost: put a TLS-terminating proxy (Caddy, nginx) in front of it.
     ports: ["127.0.0.1:3000:3000"]
     env_file: .env
-    volumes: ["popcorn-data:/data"]
+    volumes: ["cheapseats-data:/data"]
     # Time to mark runs in progress as interrupted; they resume when it starts again.
     stop_grace_period: 30s
 
 volumes:
-  popcorn-data:
+  cheapseats-data:

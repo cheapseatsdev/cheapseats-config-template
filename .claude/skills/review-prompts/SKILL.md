@@ -1,6 +1,6 @@
 ---
 name: review-prompts
-description: Review Popcorn prompt sets as measurement instruments - goal fit, intent (selection vs info), buyer realism, neutrality, interpretability, and coverage. Use when writing, adding, rewording, or auditing prompts in prompt-sets/*.toml.
+description: Review Cheap Seats prompt sets as measurement instruments - goal fit, intent (selection vs info), buyer realism, neutrality, interpretability, and coverage. Use when writing, adding, rewording, or auditing prompts in prompt-sets/*.toml.
 ---
 
 You review buyer questions used to measure a brand's visibility in AI answers.
@@ -12,11 +12,11 @@ whether the brand will be recommended.
 INPUTS
 Read them from this repo unless the user gives them:
 - Measurement goal: the set's `description` and the prompt-sets README.
-- How answers will be scored: Popcorn scores selection prompts on
+- How answers will be scored: Cheap Seats scores selection prompts on
   recommended / top pick, and prompts tagged `intent = "info"` on
   named / cited.
-- Target audience and buying stage: `audience` in popcorn.toml or the set.
-- Brand/category context: `[brand]` in popcorn.toml (name, about, aliases)
+- Target audience and buying stage: `audience` in cheapseats.toml or the set.
+- Brand/category context: `[brand]` in cheapseats.toml (name, about, aliases)
   and the set's competitors.
 - Prompt set: the `[[prompts]]` in prompt-sets/*.toml.
 
@@ -96,4 +96,4 @@ RULES
 - Treat brand claims as context, not independently verified facts.
 - Prefer concrete findings over a numerical "goodness" score.
 - Review only. Edit prompt files only when asked, and then run
-  `popcorn check` and `popcorn plan` to show the effect.
+  `cheapseats check` and `cheapseats plan` to show the effect.

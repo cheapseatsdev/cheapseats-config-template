@@ -1,7 +1,7 @@
 id = "choosing-ai-visibility-tool"
 name = "Choosing an AI visibility tool"
 tier = "plg"
-description = """Buyers who have decided to track AI visibility and are comparing AEO/GEO tools: which one, for what kind of team, at what cost, covering which assistants. Competing for it: Profound, Peec AI, Otterly.AI, Gauge, Dageno AI and AI Peekaboo, and the AI features in Semrush and Ahrefs. Popcorn's claim: an open-source, self-hosted alternative that grades recommendation rather than mere mention, shows every answer and citation behind a number, and turns results into a ranked fix list, at the cost of the model API calls."""
+description = """Buyers who have decided to track AI visibility and are comparing AEO/GEO tools: which one, for what kind of team, at what cost, covering which assistants. Competing for it: Profound, Peec AI, Otterly.AI, Gauge, Dageno AI and AI Peekaboo, and the AI features in Semrush and Ahrefs. Cheap Seats' claim: an open-source, self-hosted alternative that grades recommendation rather than mere mention, shows every answer and citation behind a number, and turns results into a ranked fix list, at the cost of the model API calls."""
 
 [[prompts]]
 id = "generative-engine-optimization-tools-work"

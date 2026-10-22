@@ -1,26 +1,26 @@
-# popcorn configuration. Secrets (API keys, tokens) come from the environment or .env; see
+# cheapseats configuration. Secrets (API keys, tokens) come from the environment or .env; see
 # .env.example in the app repo. Prompt sets live in prompt-sets/ beside this file.
 #
-# This sample measures Popcorn itself. Copy the directory to start a config repo for your brand.
+# This sample measures Cheap Seats itself. Copy the directory to start a config repo for your brand.
 
 [brand]
-name = "Popcorn"
-aliases = ["popcorn.zone", "metcalfc/popcorn"]
-# What the product is, so the grader can tell it apart from other things called "popcorn".
-about = "Popcorn is an open-source, self-hosted tool that asks AI assistants a brand's buyer questions, grades whether they recommend the brand, and builds a ranked list of fixes."
+name = "Cheap Seats"
+aliases = ["cheapseats.dev", "cheapseatsdev/cheapseats"]
+# What the product is, so the grader can tell it apart from other things called "cheapseats".
+about = "Cheap Seats is an open-source, self-hosted tool that asks AI assistants a brand's buyer questions, grades whether they recommend the brand, and builds a ranked list of fixes."
 # Who asks the questions. The answerers are told they're answering this person's question.
 # Changing `about` or `audience` changes how answers are asked or graded, so every trend restarts.
 audience = "a product marketing lead"
 # Public claims the analyst may build fixes on. Everything here is sent to the model.
 facts = [
-  "Popcorn is MIT licensed and runs as a single Docker container with a SQLite database.",
+  "Cheap Seats is MIT licensed and runs as a single Docker container with a SQLite database.",
   "Prompt sets are TOML files in a git repo you own; changes go through pull requests.",
   "Answers come from Claude and OpenAI models through their APIs, or through local Claude Code and Codex CLIs on your own subscriptions.",
   "Each question is asked on two tracks: search, where the assistant must search the web first, and recall, with no tools, from what the model already believes.",
   "Each answer is graded recommended, mentioned or absent, with the brand's position, the top pick, every product named for share of voice, and the objections raised.",
   "Every run builds a ranked fix list: the exact page to create or change, what it must say, the prompts it should flip, which of the brand's sites it belongs on, and its owner.",
   "Rankings track each prompt set's share-of-voice rank and rates day by day, and every answer, search result and citation behind them is kept.",
-  "Popcorn has a web UI, a CLI, a JSON API and an MCP server, and deploys with Docker, a Helm chart for Kubernetes, or on an exe.dev VM.",
+  "Cheap Seats has a web UI, a CLI, a JSON API and an MCP server, and deploys with Docker, a Helm chart for Kubernetes, or on an exe.dev VM.",
   "A daily budget caps spend on API calls; prompts and answers go only to the model providers you configure.",
 ]
 
@@ -30,31 +30,31 @@ facts = [
 # listed themselves; a host/path covers that prefix. kind: marketing | docs | blog | community |
 # code | other. Adding or changing sites never restarts a trend.
 [[brand.sites]]
-url = "popcorn.zone"
+url = "cheapseats.dev"
 kind = "marketing"
 # owner = "web team"
 
-# A path is its own site: pages under popcorn.zone/docs count as docs, the rest as marketing.
+# A path is its own site: pages under cheapseats.dev/docs count as docs, the rest as marketing.
 [[brand.sites]]
-url = "popcorn.zone/docs"
+url = "cheapseats.dev/docs"
 kind = "docs"
 # owner = "docs team"
 
 [[brand.sites]]
-url = "popcorn.zone/blog"
+url = "cheapseats.dev/blog"
 kind = "blog"
 
 [[brand.sites]]
-url = "github.com/metcalfc/popcorn"
+url = "github.com/cheapseatsdev/cheapseats"
 kind = "code"
 
 # Every assistant that answers. Results and rankings key on `id`: never reuse an id for a
 # different model; add a new answerer instead. An answerer this machine can't call (no API key)
 # is left out of the run and its comparisons.
 #
-# provider: anthropic | openai bill the API per token, and are what a deployed Popcorn uses.
+# provider: anthropic | openai bill the API per token, and are what a deployed Cheap Seats uses.
 # claude-code | codex run a local `claude` or `codex` CLI on its logged-in subscription, which
-# only works on your own machine (the Docker image has neither; `popcorn check` says so).
+# only works on your own machine (the Docker image has neither; `cheapseats check` says so).
 #
 # One flagship from each lab: they're trained differently, so they disagree in useful ways.
 [[answerers]]

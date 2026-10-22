@@ -1,7 +1,7 @@
 name: check
 
-# Every change: validate the config with the Popcorn release it's pinned to. On a pull request,
-# also comment what the change does to trends (popcorn plan).
+# Every change: validate the config with the Cheap Seats release it's pinned to. On a pull request,
+# also comment what the change does to trends (cheapseats plan).
 on:
   pull_request:
   push:
@@ -18,16 +18,16 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - name: the Popcorn release in the Dockerfile
-        id: popcorn
+      - name: the Cheap Seats release in the Dockerfile
+        id: cheapseats
         run: echo "image=$(sed -n 's/^FROM //p' Dockerfile | head -1)" >>"$GITHUB_OUTPUT"
-      - name: popcorn check
-        run: docker run --rm -v "$PWD:/config:ro" "${{ steps.popcorn.outputs.image }}" check
-      - name: popcorn plan
+      - name: cheapseats check
+        run: docker run --rm -v "$PWD:/config:ro" "${{ steps.cheapseats.outputs.image }}" check
+      - name: cheapseats plan
         if: github.event_name == 'pull_request'
         env:
           GH_TOKEN: ${{ github.token }}
-          IMAGE: ${{ steps.popcorn.outputs.image }}
+          IMAGE: ${{ steps.cheapseats.outputs.image }}
           BASE: ${{ github.event.pull_request.base.sha }}
           PR: ${{ github.event.pull_request.number }}
         run: |
