@@ -20,10 +20,27 @@ Any Linux machine with Docker and the compose plugin.
 1. On the host, once: make `~/cheapseats`, copy [`compose.yaml`](compose.yaml) into it, and write
    `~/cheapseats/.env` with the variables above (mode 600).
 2. Put a TLS-terminating proxy in front of `127.0.0.1:3000` (Caddy, nginx), or change the port
-   binding in `compose.yaml`.
+   binding in `compose.yaml`. The proxy must pass the public host name through, or Cheap Seats must
+   be told it: a form posted from the page arrives with its origin, and Cheap Seats refuses a
+   change whose origin isn't the host the request came to (cross-site request forgery). Caddy
+   passes `Host` through by default; nginx rewrites it to the upstream address unless you add
+   `proxy_set_header Host $host;`. Either way, `CHEAPSEATS_HOSTS=cheapseats.example.com` in `.env`
+   names the host and is enough on its own.
 3. In this repo's settings: a deploy key pair whose public half is in the host user's
    `~/.ssh/authorized_keys`, and these secrets: `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_SSH_KEY` (the
-   private half). Set the repository variable `DEPLOY` to `docker-host`.
+   private half) and `DEPLOY_HOST_KEY`, the host's own public key, so the workflow talks to the
+   host and not to whatever answers at its name. Read it over a connection you already trust (not
+   `ssh-keyscan` from somewhere new, which would trust whatever answered):
+
+   ```sh
+   ssh <user>@<host> cat /etc/ssh/ssh_host_ed25519_key.pub
+   ```
+
+   Set the repository variable `DEPLOY` to `docker-host`.
+
+   A deploy set up before `DEPLOY_HOST_KEY` existed fails at this step, with a message naming the
+   secret, until it's set: the workflow used to accept whatever key the host presented on first
+   contact, which a fresh runner does on every run.
 4. Merge, or run the deploy workflow by hand. It logs the host into GHCR with the run's own
    token just long enough to pull, then `docker compose up -d`.
 

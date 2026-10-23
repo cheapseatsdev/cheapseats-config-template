@@ -3,7 +3,7 @@ name: deploy
 # On every merge to main: build this repo's image (Cheap Seats with this config) and push it to
 # ghcr.io/<this repo>:sha-<commit>, then deploy it if the repository variable DEPLOY says where:
 #
-#   DEPLOY=docker-host  secrets DEPLOY_HOST, DEPLOY_USER, DEPLOY_SSH_KEY (see deploy/README.md)
+#   DEPLOY=docker-host  secrets DEPLOY_HOST, DEPLOY_USER, DEPLOY_SSH_KEY, DEPLOY_HOST_KEY (see deploy/README.md)
 #   DEPLOY=kubernetes   secret KUBECONFIG, and deploy/values.yaml (see deploy/README.md)
 #   unset               build and push only
 #
@@ -56,6 +56,7 @@ jobs:
       - name: deploy over SSH
         env:
           KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          HOST_KEY: ${{ secrets.DEPLOY_HOST_KEY }}
           HOST: ${{ secrets.DEPLOY_HOST }}
           USER: ${{ secrets.DEPLOY_USER }}
           IMAGE: ${{ needs.image.outputs.image }}
@@ -63,7 +64,14 @@ jobs:
           ACTOR: ${{ github.actor }}
         run: |
           install -m 600 /dev/null key && printf '%s\n' "$KEY" >key
-          ssh="ssh -i key -o StrictHostKeyChecking=accept-new $USER@$HOST"
+          # The host's own public key: a fresh runner has no known_hosts, so without it the first
+          # thing to answer at the host's name would get the token below.
+          if [ -z "$HOST_KEY" ]; then
+            echo "set the DEPLOY_HOST_KEY secret to the host's public key (see deploy/README.md)" >&2
+            exit 1
+          fi
+          printf '%s %s\n' "$HOST" "$HOST_KEY" >known_hosts
+          ssh="ssh -i key -o UserKnownHostsFile=known_hosts -o StrictHostKeyChecking=yes $USER@$HOST"
           # The image is private: log the host in with this run's token just long enough to pull.
           printf '%s' "$TOKEN" | $ssh "docker login ghcr.io -u $ACTOR --password-stdin >/dev/null"
           $ssh "cd cheapseats && CHEAPSEATS_IMAGE=$IMAGE docker compose pull && CHEAPSEATS_IMAGE=$IMAGE docker compose up -d --wait && echo CHEAPSEATS_IMAGE=$IMAGE >image.env"
