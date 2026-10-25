@@ -1,17 +1,18 @@
 # Prompt sets
 
-Each file is one category of buyer questions. Cheap Seats only reads them, so change one with a pull
-request, after `cheapseats check`.
+Each file holds one category of buyer questions. Change it in your config repo, run
+`cheapseats check -no-jev`, then submit a pull request. Cheap Seats does not edit these files.
+The flag skips optional model judgments; the config and prompt validation still run.
 
 ```toml
 id = "ai-search-visibility"       # never change it: runs and rankings key on it
-name = "Finding out whether AI assistants recommend us"
-tier = "core"                     # core: daily, full samples. plg: every tiers.plg.every_days, one sample
+name = "Understanding and measuring AI visibility"
+tier = "core"                   # interval: tiers.core.every_days; uses full configured samples
 description = """What the category is, who is competing for it, and what the brand claims."""
 
 [[prompts]]
-id = "find-whether-chatgpt-recommends-product"
-text = "How can I find out whether ChatGPT recommends my product when people ask about my category?"
+id = "tools-track-often-ai-assistants"
+text = "What tools track how often AI assistants like ChatGPT, Claude, Perplexity and Gemini mention a brand?"
 
 [[prompts]]
 id = "recommended-versus-mentioned-ai-answers"
@@ -23,41 +24,84 @@ intent = "info"                   # asks to explain, not to choose: scored on na
 [[competitors]]
 name = "Peec AI"
 aliases = ["Peec"]
+domains = ["peec.ai"]  # pages on these sites belong to this competitor
 ```
 
-**Prompt ids are permanent.** Results, trends and fix lists follow a prompt by its id, so:
+`core` and `plg` intervals come from `[tiers.core]` and `[tiers.plg]`; PLG samples are capped by
+`tiers.plg.max_samples` (default 1). Scheduling also needs `[schedule]` configured.
+
+**Prompt ids are permanent.** Results, trends and fix lists identify questions by id:
 
 - **Same id, same question.** Fixing a typo or rewording keeps the id: the prompt's history
   carries on, marked as reworded that day. Asking something different gets a new id.
-- **Ids are unique across every set** and never reused. Moving a prompt to another set keeps its
-  id, and its history moves with it. Once removed, an id stays retired.
+- **Ids are unique across every set** and never reused. Keep the id when moving a question to
+  another set; stored runs retain their original set and prompt ids. Removed ids stay retired.
 - Order in the file is only display order.
 
-**Say what a good answer looks like.** Most questions ask an assistant to choose ("what should I
-use for...", "X vs Y"), so the brand is scored on being recommended and being the top pick. A
-question that asks it to explain or how-to ("what is...", "how do I...") can be answered well
-without naming any product. Mark it `intent = "info"`: it's scored only on whether the brand is
-named or cited, and stays out of the recommended and top-pick rates, so a correct, product-free
-answer isn't counted as a loss. Don't reword an explanation question into "recommend a tool" to
-make it scoreable; that's a different question. Changing a prompt's intent keeps its history, and
-the day it changes is marked like a reword. The `review-prompts` skill in `.claude/skills/` reviews
-a set with Claude Code: run `/review-prompts` in this repo.
+**Set intent by what a good answer requires.** Selection questions ("what should I use for...",
+"X vs Y") score recommendations and top picks. An explanation ("what is...", or a how-to that
+needs no product) gets `intent = "info"`: it counts toward named only, not recommended or top-pick
+rates. Citations do not make the brand named; the grader reads answer text, not citations.
+Judge the answer needed, not the opening words: a how-to is not selection just because a
+visibility tool can do the job. A complete manual or API workflow can satisfy an info question.
+Don't turn an explanation into "recommend a tool" just to score it; that is another question.
+Intent changes keep history and are annotated like rewording; comparisons exclude that prompt
+across the change. Use [prompt review](https://cheapseats.dev/docs/prompt-review/)
+to check wording and coverage.
 
-**Changing a set doesn't restart its trend.** Rankings carry on through added, removed and
-reworded prompts, changed intents, new competitors and new answerer models, and each day says what changed since
-the day before. Comparisons with the day before only count the prompts both days asked, worded the
-same. Editing a set's name, description or tier changes nothing. A new trend starts only when how
-answers are asked or graded changes: the brand's name, aliases, about or audience, the grader, or a
-Cheap Seats release that changes its prompts. The full list:
+**Keep measurement goals clear.** The shipped sets separate these situations:
+
+| set | what it measures |
+| --- | --- |
+| `ai-search-visibility` | Named presence while explaining awareness and measurement; one explicit tool-discovery question also measures recommendations. |
+| `choosing-ai-visibility-tool` | Open tool selection and requests for alternatives, plus informational evaluation questions. |
+| `competitor-comparisons` | Choices within a supplied pair of other products; omission of a third brand is not failed open discovery. |
+| `fix-ai-recommendations` | Named presence while explaining diagnosis and improvement; one explicit tool-selection question also measures recommendations. |
+| `head-to-heads` | Known-brand comparison and fit; naming the brand in the question prevents a discovery claim. Named presence alone does not establish factual accuracy. |
+| `self-hosted-ai-visibility` | Open-source, self-hosted and DIY needs; a constrained segment, not the whole market. |
+
+Selection/info and whether the question supplies a brand or shortlist are separate distinctions.
+These descriptions do not add new TOML intent values. The `core` tier controls scheduling and
+samples; it does not by itself identify a frozen benchmark.
+
+**Set edits do not start a new method.** Rankings annotate added, removed and reworded prompts,
+intent changes, competitors and answerers. Day-over-day comparisons use only shared prompts,
+worded the same, and shared answerers. A set's name, description or tier does not change the
+method. A new method starts when answer or search instructions, grader prompt/model, or brand
+name/aliases/`about` change; audience is part of the answer prompt. The full list:
 [what restarts a trend](https://cheapseats.dev/docs/prompt-sets/#what-restarts-a-trend).
 
-**Ask the way a buyer would.** Only `head-to-heads` names the brand; in every other set it has to be
-named on its own merits (`cheapseats check` enforces this, matching the brand name and aliases as whole
-words). Write each question the way someone who has never heard of the brand would type it, and keep
-each set at 15–20 prompts so a rate means something.
+**Ask the way a buyer would.** Only `head-to-heads` names the brand; `cheapseats check` enforces
+this with whole-word name and alias matches. Elsewhere, ask as someone who has never heard of
+the brand. Specific budget, deployment and engine needs are legitimate even when this product
+cannot meet them. Answerers receive the prompt text and `brand.audience`, not this README or
+the set description, so put necessary buyer context in the question.
 
-Sets written before prompts had ids (`prompts = ["...", "..."]`) are converted by
-`cheapseats migrate-config <dir>`, which makes an id from each prompt's words; review them before
-committing.
+**Validate coverage, not a quota.** Start with 15–20 distinct buyer questions as a planning guide.
+Do not pad a smaller coherent set. Report the choice/info mix: a 20-question set with 19 info
+prompts has one question behind its recommendation rate. Extra samples repeat those questions;
+they do not add buyer scenarios. Use the actual tier caps, available answerers and cadence when
+interpreting precision. A weekly run does not deliver a worked example's seven daily runs.
+See [Noise and confidence](https://cheapseats.dev/docs/noise-and-confidence/).
+
+**Record what supports a question.** These examples are curated scenarios, not evidence of
+search volume or representative buyer demand. The new open-source peer comparisons are
+exploratory hypotheses. Before expanding or weighting a set, use actual customer questions,
+support, sales or public query evidence. Source notes can be TOML comments; unrecognized fields
+are errors. Writing a page for a prompt does not independently validate demand for it.
+
+**Keep a stable benchmark and explore deliberately.** Review monthly, using recorded answers
+where available. Always-absent questions can preserve important gaps; ceiling questions can
+detect regressions. Similar wording alone does not prove redundancy. Investigate flags and
+explain retirements instead of changing questions until the brand wins. Keep stable questions
+alongside clearly identified exploratory additions and inspect `cheapseats plan` before merging.
+
+The older template-only ids `developer-tool-ai-recommends-it` and
+`engineering-team-measure-llm-recommendations` were already retired from the canonical sample.
+They remain retired here; do not reuse them. Existing deployments that keep those questions
+should treat them as informational methods questions, not product selection.
+
+Convert legacy `prompts = ["...", "..."]` files with `cheapseats migrate-config <dir>`.
+It derives ids from prompt words; review them before committing.
 
 Prompts are sent to every answerer's provider on each run. Don't put anything in them that isn't public.
