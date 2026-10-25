@@ -18,7 +18,8 @@ It starts out measuring Cheap Seats itself, as a working example. Make it yours:
    (`[[brand.sites]]`: marketing, docs, blog... with an owner each), and public facts the fix list
    may rely on.
 3. **Write your prompt sets.** Replace the examples in `prompt-sets/`, one file per category of
-   buyer question, 15–20 questions each, asked the way someone who's never heard of you would.
+   buyer question, asked the way someone who's never heard of you would. Start with 15–20 distinct
+   questions as a coverage guide; smaller coherent sets are valid and the count guarantees no precision.
    Only `head-to-heads` may name you. Every prompt has a permanent id; read the
    [format](prompt-sets/README.md) before you start.
 4. **Choose where it runs** and set it up once: [deploy/README.md](deploy/README.md).
@@ -40,7 +41,11 @@ and merge. Cheap Seats backs up its database before any schema change and keeps 
 To try a change locally, from a checkout of the [app](https://github.com/cheapseatsdev/cheapseats):
 
 ```bash
-CHEAPSEATS_CONFIG=../your-config/cheapseats.toml go run ./cmd/cheapseats check
+CHEAPSEATS_CONFIG=../your-config/cheapseats.toml go run ./cmd/cheapseats check -no-jev
 go run ./cmd/cheapseats plan <a checkout of main> ../your-config
 CHEAPSEATS_CONFIG=../your-config/cheapseats.toml go run ./cmd/cheapseats serve
 ```
+
+`-no-jev` validates without optional model judgments. The [prompt guide](prompt-sets/README.md)
+explains selection versus informational questions, named shortlists, comparable changes and
+how samples and cadence affect the evidence.
