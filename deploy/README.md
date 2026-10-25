@@ -103,9 +103,9 @@ Uses the Cheap Seats Helm chart, released with the app at the same version as th
 4. Merge. The workflow runs `helm upgrade --install --rollback-on-failure`: a deploy whose pod
    doesn't come up healthy (a broken config, a bad secret) rolls back by itself.
 
-The chart runs one replica and replaces it rather than rolling, so two Cheap Seatss never share the
-database; expect a few seconds of downtime per deploy. The volume claim is kept if the release is
-uninstalled.
+The chart runs one replica and replaces it rather than rolling, so two Cheap Seats instances never
+share the database; expect a few seconds of downtime per deploy. The volume claim is kept if the
+release is uninstalled.
 
 ## Upgrades and rollbacks
 
