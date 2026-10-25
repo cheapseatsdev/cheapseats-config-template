@@ -41,8 +41,9 @@ Any Linux machine with Docker and the compose plugin.
    A deploy set up before `DEPLOY_HOST_KEY` existed fails at this step, with a message naming the
    secret, until it's set: the workflow used to accept whatever key the host presented on first
    contact, which a fresh runner does on every run.
-4. Merge, or run the deploy workflow by hand. It logs the host into GHCR with the run's own
-   token just long enough to pull, then `docker compose up -d`.
+4. Merge, or run the deploy workflow by hand from `main` (from any other branch it does nothing).
+   It logs the host into GHCR with the run's own token, which can only read packages, just long
+   enough to pull, then `docker compose up -d`, and logs it out again even if the deploy failed.
 
 The database lives in the `cheapseats-data` volume. Back it up with Cheap Seats' own command, which
 takes a consistent copy while it runs (copying `cheapseats.db` itself can miss recent writes still in
