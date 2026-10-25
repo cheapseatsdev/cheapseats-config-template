@@ -2,7 +2,7 @@
 # request when a new release is out; review its release notes and the plan in its checks, then
 # merge to upgrade. The digest pins the exact image, so a re-pushed tag can't change what you run;
 # Dependabot updates the tag and the digest together.
-FROM ghcr.io/cheapseatsdev/cheapseats:0.4.7@sha256:fd894bbc41075a0be1038172c8a4f56b938bb9496c206add9b5f56367dcac89a
+FROM ghcr.io/cheapseatsdev/cheapseats:0.5.1@sha256:f4265aed034429cb600cc07babde066ab8769f95ee7b9e0689c5eeebcf31b892
 COPY cheapseats.toml /config/cheapseats.toml
 COPY prompt-sets /config/prompt-sets
 # The commit this config came from, recorded on every run (the deploy workflow passes it).
