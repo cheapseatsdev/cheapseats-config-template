@@ -25,7 +25,11 @@ Any Linux machine with Docker and the compose plugin.
    change whose origin isn't the host the request came to (cross-site request forgery). Caddy
    passes `Host` through by default; nginx rewrites it to the upstream address unless you add
    `proxy_set_header Host $host;`. Either way, `CHEAPSEATS_HOSTS=cheapseats.example.com` in `.env`
-   names the host and is enough on its own.
+   names the host and is enough on its own. Have the proxy redirect HTTP to HTTPS and send
+   `Strict-Transport-Security` (Caddy redirects by default; add the header with
+   `header Strict-Transport-Security "max-age=31536000"`, or in nginx
+   `add_header Strict-Transport-Security "max-age=31536000" always;` plus a port 80 server that
+   `return 301 https://$host$request_uri;`), so a browser never sends the access token in clear.
 3. In this repo's settings: a deploy key pair whose public half is in the host user's
    `~/.ssh/authorized_keys`, and these secrets: `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_SSH_KEY` (the
    private half) and `DEPLOY_HOST_KEY`, the host's own public key, so the workflow talks to the
@@ -37,6 +41,17 @@ Any Linux machine with Docker and the compose plugin.
    ```
 
    Set the repository variable `DEPLOY` to `docker-host`.
+
+   The deploy key only needs to run commands, so restrict it in `authorized_keys`:
+
+   ```
+   no-port-forwarding,no-agent-forwarding,no-X11-forwarding,no-pty ssh-ed25519 AAAA... cheapseats-deploy
+   ```
+
+   Where practical, also add `command="..."` naming a script that runs `$SSH_ORIGINAL_COMMAND`
+   only if it's one of the three the workflow sends (`docker login`, the `cd cheapseats && ...
+   docker compose` line and `docker logout`). The host user can run Docker, which is as good as
+   root on that machine, so the key is worth that care.
 
    A deploy set up before `DEPLOY_HOST_KEY` existed fails at this step, with a message naming the
    secret, until it's set: the workflow used to accept whatever key the host presented on first
@@ -65,11 +80,20 @@ Uses the Cheap Seats Helm chart, released with the app at the same version as th
 1. Once, in the namespace you deploy to:
 
    ```bash
-   kubectl create secret generic cheapseats \
-     --from-literal=CHEAPSEATS_TOKENS=... --from-literal=ANTHROPIC_API_KEY=...
+   umask 077   # the files below are readable by you only
+   # cheapseats.env: the variables above, one NAME=value per line. Write it in an editor, so no
+   # key is typed on a command line (shell history, the process list).
+   "${EDITOR:-vi}" cheapseats.env
+   kubectl create secret generic cheapseats --from-env-file=cheapseats.env
+
    # This repo's image is private: a pull secret, from a token with read:packages.
-   kubectl create secret docker-registry ghcr --docker-server=ghcr.io \
-     --docker-username=<github user> --docker-password=<token>
+   read -rs GHCR_TOKEN   # paste the token; it isn't echoed or kept in history
+   printf '{"auths":{"ghcr.io":{"auth":"%s"}}}' \
+     "$(printf '%s:%s' '<github user>' "$GHCR_TOKEN" | base64 | tr -d '\n')" >ghcr.json
+   kubectl create secret generic ghcr --type=kubernetes.io/dockerconfigjson \
+     --from-file=.dockerconfigjson=ghcr.json
+
+   rm cheapseats.env ghcr.json; unset GHCR_TOKEN
    ```
 
 2. Adjust [`values.yaml`](values.yaml): volume size, ingress host and TLS.
