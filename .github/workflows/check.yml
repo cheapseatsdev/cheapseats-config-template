@@ -2,6 +2,10 @@ name: check
 
 # Every change: validate the config with the Cheap Seats release it's pinned to. On a pull request,
 # also comment what the change does to trends (cheapseats plan).
+#
+# A pull request's Dockerfile is untrusted: its FROM line is checked against the Cheap Seats
+# release grammar before anything runs it, and the job that runs it holds no write token. Only
+# the comment job can write to the pull request, and it runs nothing from the pull request.
 on:
   pull_request:
   push:
@@ -9,32 +13,60 @@ on:
 
 permissions:
   contents: read
-  pull-requests: write
 
 jobs:
   check:
     runs-on: ubuntu-24.04
+    outputs:
+      plan: ${{ steps.plan.outputs.plan }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           fetch-depth: 0
+          persist-credentials: false
       - name: the Cheap Seats release in the Dockerfile
         id: cheapseats
-        run: echo "image=$(sed -n 's/^FROM //p' Dockerfile | head -1)" >>"$GITHUB_OUTPUT"
+        run: |
+          image=$(sed -n 's/^FROM //p' Dockerfile | head -1)
+          if ! printf '%s\n' "$image" | grep -Eqx 'ghcr\.io/cheapseatsdev/cheapseats:[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?(@sha256:[0-9a-f]{64})?'; then
+            echo "the Dockerfile's FROM must be ghcr.io/cheapseatsdev/cheapseats:<version>[@sha256:<digest>]" >&2
+            exit 1
+          fi
+          echo "image=$image" >>"$GITHUB_OUTPUT"
       - name: cheapseats check
-        run: docker run --rm -v "$PWD:/config:ro" "${{ steps.cheapseats.outputs.image }}" check
+        env:
+          IMAGE: ${{ steps.cheapseats.outputs.image }}
+        run: docker run --rm -v "$PWD:/config:ro" "$IMAGE" check
       - name: cheapseats plan
+        id: plan
         if: github.event_name == 'pull_request'
         env:
-          GH_TOKEN: ${{ github.token }}
           IMAGE: ${{ steps.cheapseats.outputs.image }}
           BASE: ${{ github.event.pull_request.base.sha }}
-          PR: ${{ github.event.pull_request.number }}
         run: |
           git worktree add -q "$RUNNER_TEMP/base" "$BASE"
           if docker run --rm -v "$RUNNER_TEMP/base:/before:ro" -v "$PWD:/after:ro" "$IMAGE" plan /before /after >plan.md 2>plan.err; then
-            gh pr comment "$PR" --body-file plan.md --edit-last 2>/dev/null || gh pr comment "$PR" --body-file plan.md
+            # A comment holds at most 65536 characters; the delimiter is random so the plan can't end the output early.
+            eof=$(openssl rand -hex 16)
+            { echo "plan<<$eof"; head -c 60000 plan.md; echo; echo "$eof"; } >>"$GITHUB_OUTPUT"
           else
             echo "Couldn't plan against the base branch (it may be from before a config format change):"
             cat plan.err
           fi
+
+  comment:
+    needs: check
+    if: github.event_name == 'pull_request' && needs.check.outputs.plan != ''
+    runs-on: ubuntu-24.04
+    permissions:
+      pull-requests: write
+    steps:
+      - name: comment the plan
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PLAN: ${{ needs.check.outputs.plan }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          printf '%s\n' "$PLAN" >plan.md
+          gh pr comment "$PR" --body-file plan.md --edit-last 2>/dev/null || gh pr comment "$PR" --body-file plan.md
